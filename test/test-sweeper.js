@@ -11,11 +11,65 @@ const Code = require('code');
 const expect = Code.expect;
 const Sweeper = require('../index');
 
-lab.experiment('Seeper', function() {
-    lab.test('Placeholder', function(done) {
+class SP extends Sweeper {
+    constructor() {
+        const log = {};
+        log.debug = log.error = log.warn = msg => this.logs.push(msg);
+        super('TEST', 100, {log});
+        this.logs = [];
+        this.counter = 0;
+    }
+
+    run() {
+        this.counter += 1;
+        return Promise.reject('rejected');
+    }
+}
+
+class SE extends Sweeper {
+    constructor() {
+        const log = {};
+        log.debug = log.error = log.warn = msg => this.logs.push(msg);
+        super('TEST', 100, {log});
+        this.logs = [];
+        this.counter = 0;
+    }
+
+    run() {
+        this.counter += 1;
+        throw new Error('argh');
+    }
+}
+
+lab.experiment('Sweeper', function() {
+    lab.test('New', done => {
         const sweeper = new Sweeper();
         expect(sweeper).to.be.instanceof(Sweeper);
         done();
+    });
+
+    lab.test('Run promise fails', done => {
+        const sweeper = new SP();
+        sweeper.start();
+
+        setTimeout(() => {
+            expect(sweeper.counter).to.be.equal(2);
+            expect(sweeper.logs).to.have.length(3);
+            sweeper.stop();
+            done();
+        }, 250);
+    });
+
+    lab.test('Run throws', done => {
+        const sweeper = new SE();
+        sweeper.start();
+
+        setTimeout(() => {
+            expect(sweeper.counter).to.be.equal(2);
+            expect(sweeper.logs).to.have.length(3);
+            sweeper.stop();
+            done();
+        }, 250);
     });
 });
 

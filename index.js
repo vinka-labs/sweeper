@@ -90,7 +90,7 @@ class Sweeper {
             ret.then(
                 () => {},
                 err => this._log('error', `error in ${this.name} async poll`, err, (err || {}).stack))
-            .finally(() => next(this));
+            .then(() => next(this));
             return ret;
         } else {
             next(this);
